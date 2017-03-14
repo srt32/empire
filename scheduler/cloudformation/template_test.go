@@ -10,10 +10,12 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/remind101/empire/pkg/bytesize"
 	"github.com/remind101/empire/pkg/image"
 	"github.com/remind101/empire/pkg/troposphere"
+	"github.com/remind101/empire/procfile"
 	"github.com/remind101/empire/scheduler"
 	"github.com/stretchr/testify/assert"
 )
@@ -394,6 +396,66 @@ func TestEmpireTemplate(t *testing.T) {
 						MemoryLimit: 128 * bytesize.MB,
 						CPUShares:   256,
 						Nproc:       256,
+					},
+				},
+			},
+		},
+
+		{
+			"ecs-extra.json",
+			&scheduler.App{
+				ID:      "1234",
+				Release: "v1",
+				Name:    "acme-inc",
+				Env: map[string]string{
+					// These should get re-sorted in
+					// alphabetical order.
+					"C": "foo",
+					"A": "foobar",
+					"B": "bar",
+				},
+				Processes: []*scheduler.Process{
+					{
+						Type:    "web",
+						Image:   image.Image{Repository: "remind101/acme-inc", Tag: "latest"},
+						Command: []string{"./bin/web"},
+						Env: map[string]string{
+							"PORT": "8080",
+						},
+						Exposure: &scheduler.Exposure{
+							Ports: []scheduler.Port{
+								{
+									Host:      80,
+									Container: 8080,
+									Protocol:  &scheduler.HTTP{},
+								},
+							},
+						},
+						Labels: map[string]string{
+							"empire.app.process": "web",
+						},
+						MemoryLimit: 128 * bytesize.MB,
+						CPUShares:   256,
+						Instances:   1,
+						Nproc:       256,
+						ECS: &procfile.ECS{
+							Placement: &procfile.Placement{
+								Constraints: []*ecs.PlacementConstraint{
+									{Type: aws.String("memberOf"), Expression: aws.String("attribute:ecs.instance-type =~ t2.*")},
+								},
+							},
+						},
+					},
+					{
+						Type:    "worker",
+						Image:   image.Image{Repository: "remind101/acme-inc", Tag: "latest"},
+						Command: []string{"./bin/worker"},
+						Labels: map[string]string{
+							"empire.app.process": "worker",
+						},
+						Env: map[string]string{
+							"FOO": "BAR",
+						},
 					},
 				},
 			},
