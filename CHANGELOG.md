@@ -2,6 +2,10 @@
 
 ## HEAD
 
+**Features**
+
+* You can now specify ECS placement constraints and strategies in the Procfile. [#1059](https://github.com/remind101/empire/pull/1059)
+
 ## 0.12.0 (2017-03-10)
 
 **Features**
