@@ -26,6 +26,10 @@ func TestEvents_String(t *testing.T) {
 		{RestartEvent{User: "ejholmes", App: "acme-inc", Message: "commit message"}, "ejholmes restarted acme-inc: 'commit message'"},
 		{RestartEvent{User: "ejholmes", App: "acme-inc", PID: "abcd", Message: "commit message"}, "ejholmes restarted `abcd` on acme-inc: 'commit message'"},
 
+		// MaintenanceEvent
+		{MaintenanceEvent{User: "ejholmes", App: "acme-inc", Maintenance: false}, "ejholmes disabled maintenance mode on acme-inc"},
+		{MaintenanceEvent{User: "ejholmes", App: "acme-inc", Maintenance: true}, "ejholmes enabled maintenance mode on acme-inc"},
+
 		// ScaleEvent
 		{ScaleEvent{
 			User: "ejholmes",
