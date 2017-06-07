@@ -37,7 +37,7 @@ func runMaintenance(cmd *Command, args []string) {
 }
 
 var cmdMaintenanceEnable = &Command{
-	Run:      runMaintenanceEnable,
+	Run:      maybeMessage(runMaintenanceEnable),
 	Usage:    "maintenance-enable",
 	NeedsApp: true,
 	Category: "app",
@@ -51,18 +51,19 @@ Example:
 }
 
 func runMaintenanceEnable(cmd *Command, args []string) {
+	message := getMessage()
 	if len(args) != 0 {
 		cmd.PrintUsage()
 		os.Exit(2)
 	}
 	newmode := true
-	app, err := client.AppUpdate(mustApp(), &heroku.AppUpdateOpts{Maintenance: &newmode})
+	app, err := client.AppUpdate(mustApp(), &heroku.AppUpdateOpts{Maintenance: &newmode}, message)
 	must(err)
 	log.Printf("Enabled maintenance mode on %s.", app.Name)
 }
 
 var cmdMaintenanceDisable = &Command{
-	Run:      runMaintenanceDisable,
+	Run:      maybeMessage(runMaintenanceDisable),
 	Usage:    "maintenance-disable",
 	NeedsApp: true,
 	Category: "app",
@@ -76,12 +77,13 @@ Example:
 }
 
 func runMaintenanceDisable(cmd *Command, args []string) {
+	message := getMessage()
 	if len(args) != 0 {
 		cmd.PrintUsage()
 		os.Exit(2)
 	}
 	newmode := false
-	app, err := client.AppUpdate(mustApp(), &heroku.AppUpdateOpts{Maintenance: &newmode})
+	app, err := client.AppUpdate(mustApp(), &heroku.AppUpdateOpts{Maintenance: &newmode}, message)
 	must(err)
 	log.Printf("Disabled maintenance mode on %s.", app.Name)
 }
